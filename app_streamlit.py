@@ -153,3 +153,50 @@ if st.sidebar.button("Generate Forecast"):
             st.info(
                 "Try different p,d,q values. Common values for stocks: (1,1,1) or (2,1,2)"
             )
+
+    # -----------------------------
+    # PROPHET FORECAST
+    # -----------------------------
+    with st.spinner("Running Prophet forecast..."):
+        df_prophet = (
+            full_stock_data[["Adj Close"]]
+            .reset_index()
+            .rename(columns={"Date": "ds", "Adj Close": "y"})
+        )
+
+        prophet = Prophet(
+            changepoint_prior_scale=0.5,
+            seasonality_prior_scale=1,
+            daily_seasonality=False,
+        )
+        prophet.fit(df_prophet)
+
+        future = prophet.make_future_dataframe(periods=prediction_days)
+        forecast = prophet.predict(future)
+
+        fig_prophet = go.Figure(
+            [
+                go.Scatter(
+                    x=df_prophet["ds"],
+                    y=df_prophet["y"],
+                    name="Actual",
+                    line=dict(color="white"),
+                ),
+                go.Scatter(
+                    x=forecast["ds"].iloc[-prediction_days:],
+                    y=forecast["yhat"].iloc[-prediction_days:],
+                    name="Prophet Forecast",
+                    line=dict(color="cyan", dash="dot"),
+                ),
+            ]
+        )
+
+        fig_prophet.update_layout(
+            xaxis_title="Date",
+            yaxis_title="Price",
+            template="plotly_dark",
+            xaxis_rangeslider_visible=False,
+        )
+
+        st.header(f"Prophet Forecast ({prediction_days} Days)")
+        st.plotly_chart(fig_prophet, use_container_width=True)
