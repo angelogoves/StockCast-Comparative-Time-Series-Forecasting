@@ -60,7 +60,7 @@ q = st.sidebar.slider("q (MA term)", 0, 5, 1)
 st.sidebar.info(
     "ℹ️ **LSTM Model Availability**\n\n"
     "Pretrained LSTM models are available only for **AAPL, TSLA, and MSFT**.\n\n"
-    "Other stocks will use **Prophet-only** forecasting."
+    "Other stocks will use **ARIMA & Prophet only** forecasting."
 )
 
 # -----------------------------
@@ -286,3 +286,57 @@ if st.sidebar.button("Generate Forecast"):
 
             except Exception as e:
                 st.error(f"LSTM model error: {e}")
+
+        # -----------------------------
+        # HYBRID FORECAST (PROPHET + LSTM AVERAGE)
+        # -----------------------------
+        hybrid_values = (
+            forecast["yhat"].iloc[-prediction_days:]
+            + future_prices.flatten()
+            + forecast_values
+        ) / 3
+
+        fig_hybrid = go.Figure(
+            [
+                go.Scatter(
+                    x=display_stock_data.index,
+                    y=display_stock_data["Adj Close"],
+                    name="Historical Price",
+                    line=dict(color="grey"),
+                ),
+                go.Scatter(
+                    x=forecast_dates,
+                    y=forecast_values,
+                    name="ARIMA Forecast",
+                    line=dict(color="red", dash="dot"),
+                ),
+                go.Scatter(
+                    x=future_dates,
+                    y=forecast["yhat"].iloc[-prediction_days:],
+                    name="Prophet Forecast",
+                    line=dict(color="cyan", dash="dot"),
+                ),
+                go.Scatter(
+                    x=future_dates,
+                    y=future_prices.flatten(),
+                    name="LSTM Forecast",
+                    line=dict(color="orange"),
+                ),
+                go.Scatter(
+                    x=future_dates,
+                    y=hybrid_values,
+                    name="Hybrid Average Forecast",
+                    line=dict(color="lime", width=3),
+                ),
+            ]
+        )
+
+        fig_hybrid.update_layout(
+            xaxis_title="Date",
+            yaxis_title="Price",
+            template="plotly_dark",
+            xaxis_rangeslider_visible=False,
+        )
+
+        st.header("Hybrid Forecast (Prophet + LSTM)")
+        st.plotly_chart(fig_hybrid, use_container_width=True)
