@@ -288,7 +288,7 @@ if st.sidebar.button("Generate Forecast"):
                 st.error(f"LSTM model error: {e}")
 
         # -----------------------------
-        # HYBRID FORECAST (PROPHET + LSTM AVERAGE)
+        # HYBRID FORECAST (ARIMA + PROPHET + LSTM AVERAGE)
         # -----------------------------
         hybrid_values = (
             forecast["yhat"].iloc[-prediction_days:]
