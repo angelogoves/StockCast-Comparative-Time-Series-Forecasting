@@ -131,6 +131,13 @@ This will run through:
 4. Performance evaluation and comparison
 5. Results visualization and interpretation
 
+### View Live Application
+
+The interactive web application is deployed on Streamlit and can be accessed at:
+**[https://stockcast-comparative-time-series-forecasting.streamlit.app/](https://stockcast-comparative-time-series-forecasting.streamlit.app/)**
+
+The live application provides the same functionality as running locally, with real-time data and interactive visualizations.
+
 ---
 
 ## 📈 Models Overview
